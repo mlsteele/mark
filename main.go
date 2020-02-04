@@ -31,23 +31,23 @@ func main() {
 	keepAtIt := true
 	in := NewInput()
 	go in.Start()
-
-	waitLevel := 0
+	lastPrint := time.Now()
 
 	for keepAtIt {
-		t := time.NewTimer(300 * time.Millisecond)
 		select {
 		case s := <-in.Lines:
-			fmt.Printf("%s\n", s)
-			waitLevel = 0
-		case <-t.C:
-			waitLevel++
-			if waitLevel < 3 {
+			since := time.Since(lastPrint)
+			switch {
+			case since > 600*time.Millisecond:
+				fmt.Printf("\n\n\n\n")
+			case since > 300*time.Millisecond:
 				fmt.Printf("\n\n")
+			default:
 			}
+			fmt.Printf("%s\n", s)
+			lastPrint = time.Now()
 		case <-in.Done:
 			keepAtIt = false
 		}
-		t.Stop()
 	}
 }
